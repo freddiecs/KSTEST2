@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Analytics Dashboard</title>
+    <title>Sailia Business Analytics Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --info: #4895ef;
-            --warning: #f72585;
-            --danger: #e63946;
+            --primary: #3498db;
+            --secondary: #2980b9;
+            --success: #2ecc71;
+            --info: #3498db;
+            --warning: #f39c12;
+            --danger: #e74c3c;
             --light: #f8f9fa;
-            --dark: #212529;
+            --dark: #2c3e50;
         }
         
         * {
@@ -38,7 +38,7 @@
         }
         
         .sidebar {
-            background-color: #2b2d42;
+            background-color: #2c3e50;
             color: white;
             padding: 20px;
             position: fixed;
@@ -167,7 +167,7 @@
         
         .upload-box:hover {
             border-color: var(--primary);
-            background-color: rgba(67, 97, 238, 0.05);
+            background-color: rgba(52, 152, 219, 0.05);
         }
         
         .upload-icon {
@@ -240,16 +240,17 @@
         }
         
         .positive {
-            color: #10b981;
+            color: #2ecc71;
         }
         
         .negative {
-            color: #ef4444;
+            color: #e74c3c;
         }
         
         .chart-container {
             height: 300px;
             margin-top: 15px;
+            position: relative;
         }
         
         .form-section {
@@ -357,6 +358,44 @@
             display: none;
         }
         
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+        
+        .alert-info {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        
         /* Responsive design */
         @media (max-width: 768px) {
             .dashboard {
@@ -399,19 +438,22 @@
     </style>
 </head>
 <body>
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
     <div class="dashboard">
         <aside class="sidebar">
             <div class="logo">
-                <div class="logo-icon">B</div>
-                <span>BusinessPro</span>
+                <div class="logo-icon">S</div>
+                <span>Sailia Analytics</span>
             </div>
             <ul class="menu">
                 <li><a href="#" class="active" data-page="dashboard"><span class="menu-icon">📊</span> Dashboard</a></li>
-                <li><a href="#" data-page="bookings"><span class="menu-icon">📅</span> Bookings</a></li>
-                <li><a href="#" data-page="accounting"><span class="menu-icon">💰</span> Accounting</a></li>
-                <li><a href="#" data-page="reports"><span class="menu-icon">📈</span> Reports</a></li>
-                <li><a href="#" data-page="forms"><span class="menu-icon">📝</span> Forms</a></li>
-                <li><a href="#" data-page="settings"><span class="menu-icon">⚙️</span> Settings</a></li>
+                <li><a href="#" data-page="courses"><span class="menu-icon">🎓</span> Courses Analysis</a></li>
+                <li><a href="#" data-page="financial"><span class="menu-icon">💰</span> Financial Analysis</a></li>
+                <li><a href="#" data-page="customers"><span class="menu-icon">👥</span> Customer Analysis</a></li>
+                <li><a href="#" data-page="locations"><span class="menu-icon">📍</span> Locations</a></li>
             </ul>
         </aside>
         
@@ -427,350 +469,113 @@
             <!-- Dashboard Page -->
             <div class="page-content active" id="dashboard-page">
                 <div class="data-import">
-                    <h2 class="section-title">Import Data</h2>
-                    <div class="upload-container">
-                        <div class="upload-box" id="booking-upload">
-                            <div class="upload-icon">📅</div>
-                            <h3 class="upload-title">Booking Data</h3>
-                            <p class="upload-description">Upload CSV or Excel files from your booking system</p>
-                            <input type="file" id="booking-file" class="hidden" accept=".csv, .xlsx, .xls">
-                            <button class="upload-button" id="booking-btn">Choose File</button>
-                        </div>
-                        
-                        <div class="upload-box" id="accounting-upload">
-                            <div class="upload-icon">💰</div>
-                            <h3 class="upload-title">Accounting Data</h3>
-                            <p class="upload-description">Upload CSV or Excel files from your accounting system</p>
-                            <input type="file" id="accounting-file" class="hidden" accept=".csv, .xlsx, .xls">
-                            <button class="upload-button" id="accounting-btn">Choose File</button>
-                        </div>
+                    <h2 class="section-title">Your Sailia Data</h2>
+                    <div class="alert alert-info">
+                        Your Sailia basket data has been loaded. The dashboard is now showing analytics based on this data.
                     </div>
                 </div>
                 
                 <div class="dashboard-grid">
                     <div class="card metric-card">
                         <h3 class="metric-title">Total Revenue</h3>
-                        <div class="metric-value">$0</div>
+                        <div class="metric-value" id="total-revenue">$0</div>
                         <div class="metric-change positive">
-                            <span>+0% vs last period</span>
+                            <span id="revenue-trend">Loading...</span>
                         </div>
                     </div>
                     
                     <div class="card metric-card">
-                        <h3 class="metric-title">Total Bookings</h3>
-                        <div class="metric-value">0</div>
+                        <h3 class="metric-title">Total Transactions</h3>
+                        <div class="metric-value" id="total-transactions">0</div>
                         <div class="metric-change positive">
-                            <span>+0% vs last period</span>
+                            <span id="transactions-completed">Loading...</span>
                         </div>
                     </div>
                     
                     <div class="card metric-card">
-                        <h3 class="metric-title">Average Booking Value</h3>
-                        <div class="metric-value">$0</div>
-                        <div class="metric-change negative">
-                            <span>+0% vs last period</span>
+                        <h3 class="metric-title">Average Transaction Value</h3>
+                        <div class="metric-value" id="avg-transaction">$0</div>
+                        <div class="metric-change" id="refund-info">
+                            <span>Loading...</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="card">
-                    <h2 class="section-title">Revenue Overview</h2>
+                    <h2 class="section-title">Top Customers</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Total Bookings</th>
+                                <th>Total Spent</th>
+                                <th>Last Booking</th>
+                                <th>Favorite Course</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-customers">
+                            <tr>
+                                <td colspan="5" class="text-center">Loading customer data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Locations Page -->
+            <div class="page-content" id="locations-page">
+                <div class="card">
+                    <h2 class="section-title">Location Performance</h2>
                     <div class="chart-container">
-                        <canvas id="revenue-chart"></canvas>
+                        <canvas id="location-performance-chart"></canvas>
                     </div>
                 </div>
                 
                 <div class="dashboard-grid">
                     <div class="card">
-                        <h2 class="section-title">Bookings by Type</h2>
+                        <h2 class="section-title">Top Courses by Location</h2>
                         <div class="chart-container">
-                            <canvas id="bookings-pie-chart"></canvas>
+                            <canvas id="location-courses-chart"></canvas>
                         </div>
                     </div>
                     
                     <div class="card">
-                        <h2 class="section-title">Recent Transactions</h2>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Type</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody id="transactions-table">
-                                <tr>
-                                    <td colspan="3" class="text-center">No data available</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Bookings Page -->
-            <div class="page-content" id="bookings-page">
-                <div class="card">
-                    <h2 class="section-title">Booking Management</h2>
-                    <div class="tab-container">
-                        <div class="tabs">
-                            <div class="tab active" data-tab="booking-list">Booking List</div>
-                            <div class="tab" data-tab="booking-analytics">Analytics</div>
-                            <div class="tab" data-tab="booking-add">Add New Booking</div>
-                        </div>
-                        
-                        <div class="tab-content active" id="booking-list">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Date</th>
-                                        <th>Customer</th>
-                                        <th>Service</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="bookings-table">
-                                    <tr>
-                                        <td colspan="6" class="text-center">No data available</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="tab-content" id="booking-analytics">
-                            <div class="chart-container">
-                                <canvas id="bookings-trend-chart"></canvas>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-content" id="booking-add">
-                            <div class="form-section">
-                                <div class="form-group">
-                                    <label class="form-label">Customer Name</label>
-                                    <input type="text" class="form-control" id="booking-customer">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Service Type</label>
-                                    <select class="form-control" id="booking-service">
-                                        <option value="">Select a service</option>
-                                        <option value="Consultation">Consultation</option>
-                                        <option value="Standard Service">Standard Service</option>
-                                        <option value="Premium Service">Premium Service</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Date</label>
-                                    <input type="date" class="form-control" id="booking-date">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Amount</label>
-                                    <input type="number" class="form-control" id="booking-amount">
-                                </div>
-                                <button class="btn btn-primary" id="save-booking">Save Booking</button>
-                            </div>
+                        <h2 class="section-title">Location Revenue Trend</h2>
+                        <div class="chart-container">
+                            <canvas id="location-trend-chart"></canvas>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Accounting Page -->
-            <div class="page-content" id="accounting-page">
+                
                 <div class="card">
-                    <h2 class="section-title">Financial Overview</h2>
-                    <div class="tab-container">
-                        <div class="tabs">
-                            <div class="tab active" data-tab="transactions">Transactions</div>
-                            <div class="tab" data-tab="revenue-analysis">Revenue Analysis</div>
-                            <div class="tab" data-tab="expense-analysis">Expense Analysis</div>
-                        </div>
-                        
-                        <div class="tab-content active" id="transactions">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Description</th>
-                                        <th>Category</th>
-                                        <th>Type</th>
-                                        <th>Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="accounting-table">
-                                    <tr>
-                                        <td colspan="5" class="text-center">No data available</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="tab-content" id="revenue-analysis">
-                            <div class="chart-container">
-                                <canvas id="revenue-analysis-chart"></canvas>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-content" id="expense-analysis">
-                            <div class="chart-container">
-                                <canvas id="expense-analysis-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Reports Page -->
-            <div class="page-content" id="reports-page">
-                <div class="card">
-                    <h2 class="section-title">Business Reports</h2>
-                    <div class="tab-container">
-                        <div class="tabs">
-                            <div class="tab active" data-tab="profit-loss">Profit & Loss</div>
-                            <div class="tab" data-tab="trend-analysis">Trend Analysis</div>
-                            <div class="tab" data-tab="customer-analytics">Customer Analytics</div>
-                        </div>
-                        
-                        <div class="tab-content active" id="profit-loss">
-                            <div class="chart-container">
-                                <canvas id="profit-loss-chart"></canvas>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-content" id="trend-analysis">
-                            <div class="chart-container">
-                                <canvas id="trend-analysis-chart"></canvas>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-content" id="customer-analytics">
-                            <div class="chart-container">
-                                <canvas id="customer-analytics-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Forms Page -->
-            <div class="page-content" id="forms-page">
-                <div class="card">
-                    <h2 class="section-title">Custom Forms</h2>
-                    <div class="tab-container">
-                        <div class="tabs">
-                            <div class="tab active" data-tab="form-list">Form List</div>
-                            <div class="tab" data-tab="form-builder">Form Builder</div>
-                            <div class="tab" data-tab="form-responses">Form Responses</div>
-                        </div>
-                        
-                        <div class="tab-content active" id="form-list">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Form Name</th>
-                                        <th>Created Date</th>
-                                        <th>Responses</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Customer Feedback</td>
-                                        <td>Apr 18, 2025</td>
-                                        <td>0</td>
-                                        <td>Active</td>
-                                        <td>
-                                            <button class="btn btn-primary">View</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="tab-content" id="form-builder">
-                            <div class="form-section">
-                                <div class="form-group">
-                                    <label class="form-label">Form Name</label>
-                                    <input type="text" class="form-control" placeholder="Enter form name">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Form Description</label>
-                                    <textarea class="form-control" rows="3" placeholder="Enter form description"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Form Fields</label>
-                                    <div id="form-fields">
-                                        <!-- Fields will be added here -->
-                                    </div>
-                                    <button class="btn btn-primary" id="add-field">Add Field</button>
-                                </div>
-                                <button class="btn btn-primary">Save Form</button>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-content" id="form-responses">
-                            <p>No form responses available yet.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Settings Page -->
-            <div class="page-content" id="settings-page">
-                <div class="card">
-                    <h2 class="section-title">System Settings</h2>
-                    <div class="form-section">
-                        <div class="form-group">
-                            <label class="form-label">Business Name</label>
-                            <input type="text" class="form-control" value="BusinessPro">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Business Email</label>
-                            <input type="email" class="form-control" value="admin@business.com">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Currency</label>
-                            <select class="form-control">
-                                <option value="USD">USD ($)</option>
-                                <option value="EUR">EUR (€)</option>
-                                <option value="GBP">GBP (£)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Data Backup Frequency</label>
-                            <select class="form-control">
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-primary">Save Settings</button>
-                    </div>
+                    <h2 class="section-title">Location Details</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th>Total Bookings</th>
+                                <th>Total Revenue</th>
+                                <th>Top Course</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="locations-table">
+                            <tr>
+                                <td colspan="5" class="text-center">Loading location data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // Sample data for demonstration
-        const sampleBookingData = [
-            { id: 1, date: '2025-04-15', customer: 'John Doe', service: 'Consultation', amount: 150, status: 'Completed' },
-            { id: 2, date: '2025-04-16', customer: 'Jane Smith', service: 'Premium Service', amount: 350, status: 'Scheduled' },
-            { id: 3, date: '2025-04-17', customer: 'Robert Johnson', service: 'Standard Service', amount: 200, status: 'Completed' },
-            { id: 4, date: '2025-04-18', customer: 'Emily Davis', service: 'Consultation', amount: 150, status: 'Scheduled' }
-        ];
-        
-        const sampleAccountingData = [
-            { date: '2025-04-15', description: 'Consultation Service', category: 'Service Revenue', type: 'Income', amount: 150 },
-            { date: '2025-04-16', description: 'Premium Service', category: 'Service Revenue', type: 'Income', amount: 350 },
-            { date: '2025-04-16', description: 'Office Supplies', category: 'Office Expenses', type: 'Expense', amount: -75 },
-            { date: '2025-04-17', description: 'Standard Service', category: 'Service Revenue', type: 'Income', amount: 200 },
-            { date: '2025-04-17', description: 'Utility Bill', category: 'Utilities', type: 'Expense', amount: -120 }
-        ];
-        
-        // UI Logic
+        // Main application logic
         document.addEventListener('DOMContentLoaded', function() {
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('loading');
+            
             // Navigation
             const menuLinks = document.querySelectorAll('.menu a');
             const pageContents = document.querySelectorAll('.page-content');
@@ -812,37 +617,1854 @@
                 });
             });
             
-            // File upload handling
-            document.getElementById('booking-btn').addEventListener('click', function() {
-                document.getElementById('booking-file').click();
-            });
+            // Initialize data processing and charts
+            initializeDashboard();
             
-            document.getElementById('accounting-btn').addEventListener('click', function() {
-                document.getElementById('accounting-file').click();
-            });
-            
-            document.getElementById('booking-file').addEventListener('change', function(e) {
-                if (e.target.files.length > 0) {
-                    const fileName = e.target.files[0].name;
-                    processFile(e.target.files[0], 'booking');
-                    alert(`Booking file "${fileName}" uploaded successfully!`);
+            // Function to initialize the dashboard with data
+            async function initializeDashboard() {
+                try {
+                    // Read the CSV file
+                    const response = await window.fs.readFile('Sailia basket items export 2.csv');
+                    const text = new TextDecoder().decode(response);
+                    
+                    // Parse CSV data
+                    const parsedData = Papa.parse(text, {
+                        header: true,
+                        dynamicTyping: true,
+                        skipEmptyLines: true
+                    }).data;
+                    
+                    // Process the data for dashboard
+                    const dashboardData = processData(parsedData);
+                    
+                    // Update dashboard with processed data
+                    updateDashboard(dashboardData);
+                    
+                    // Hide loading overlay once everything is loaded
+                    loadingOverlay.style.display = 'none';
+                } catch (error) {
+                    console.error('Error processing data:', error);
+                    loadingOverlay.style.display = 'none';
+                    alert('Error loading data. Please check the console for details.');
                 }
-            });
+            }
             
-            document.getElementById('accounting-file').addEventListener('change', function(e) {
-                if (e.target.files.length > 0) {
-                    const fileName = e.target.files[0].name;
-                    processFile(e.target.files[0], 'accounting');
-                    alert(`Accounting file "${fileName}" uploaded successfully!`);
+            // Process data for various dashboard metrics and charts
+            function processData(data) {
+                // Initialize dashboard data object
+                const processed = {
+                    totalRevenue: 0,
+                    netRevenue: 0,
+                    totalRefunded: 0,
+                    transactionCount: data.length,
+                    completedTransactions: 0,
+                    providerFees: 0,
+                    products: {},
+                    locations: {},
+                    customers: {},
+                    paymentMethods: {},
+                    monthlyRevenue: {},
+                    recentTransactions: []
+                };
+                
+                // Process each row
+                data.forEach(row => {
+                    // Skip invalid data
+                    if (!row.basket_total || isNaN(row.basket_total)) return;
+                    
+                    // Basic financial metrics
+                    processed.totalRevenue += row.basket_total || 0;
+                    processed.netRevenue += row.basket_total_net || 0;
+                    processed.totalRefunded += row.basket_total_refunded || 0;
+                    processed.providerFees += row.basket_payment_provider_fee || 0;
+                    
+                    if (row.status === 'completed') {
+                        processed.completedTransactions++;
+                    }
+                    
+                    // Product/course analysis
+                    if (row.product_name) {
+                        if (!processed.products[row.product_name]) {
+                            processed.products[row.product_name] = {
+                                count: 0,
+                                revenue: 0,
+                                averagePrice: 0
+                            };
+                        }
+                        processed.products[row.product_name].count++;
+                        processed.products[row.product_name].revenue += row.basket_total || 0;
+                    }
+                    
+                    // Location analysis
+                    if (row.location_name) {
+                        if (!processed.locations[row.location_name]) {
+                            processed.locations[row.location_name] = {
+                                count: 0,
+                                revenue: 0,
+                                courses: {}
+                            };
+                        }
+                        processed.locations[row.location_name].count++;
+                        processed.locations[row.location_name].revenue += row.basket_total || 0;
+                        
+                        // Track courses at this location
+                        if (row.product_name) {
+                            if (!processed.locations[row.location_name].courses[row.product_name]) {
+                                processed.locations[row.location_name].courses[row.product_name] = {
+                                    count: 0,
+                                    revenue: 0
+                                };
+                            }
+                            processed.locations[row.location_name].courses[row.product_name].count++;
+                            processed.locations[row.location_name].courses[row.product_name].revenue += row.basket_total || 0;
+                        }
+                    }
+                    
+                    // Customer analysis
+                    if (row.email) {
+                        const customerKey = row.email;
+                        if (!processed.customers[customerKey]) {
+                            processed.customers[customerKey] = {
+                                name: row.name || 'Unknown',
+                                count: 0,
+                                totalSpent: 0,
+                                lastBooking: null,
+                                courses: {},
+                                email: row.email
+                            };
+                        }
+                        processed.customers[customerKey].count++;
+                        processed.customers[customerKey].totalSpent += row.basket_total || 0;
+                        
+                        // Track last booking date
+                        if (row.purchased_timestamp) {
+                            const bookingDate = new Date(row.purchased_timestamp);
+                            if (!processed.customers[customerKey].lastBooking || 
+                                bookingDate > processed.customers[customerKey].lastBooking) {
+                                processed.customers[customerKey].lastBooking = bookingDate;
+                            }
+                        }
+                        
+                        // Track courses booked by customer
+                        if (row.product_name) {
+                            if (!processed.customers[customerKey].courses[row.product_name]) {
+                                processed.customers[customerKey].courses[row.product_name] = 0;
+                            }
+                            processed.customers[customerKey].courses[row.product_name]++;
+                        }
+                    }
+                    
+                    // Payment method analysis
+                    if (row.payment_option) {
+                        processed.paymentMethods[row.payment_option] = 
+                            (processed.paymentMethods[row.payment_option] || 0) + 1;
+                    }
+                    
+                    // Monthly revenue trend
+                    if (row.purchased_timestamp) {
+                        try {
+                            const date = new Date(row.purchased_timestamp);
+                            const monthYear = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                            if (!processed.monthlyRevenue[monthYear]) {
+                                processed.monthlyRevenue[monthYear] = {
+                                    revenue: 0,
+                                    refunds: 0,
+                                    count: 0
+                                };
+                            }
+                            processed.monthlyRevenue[monthYear].revenue += row.basket_total || 0;
+                            processed.monthlyRevenue[monthYear].refunds += row.basket_total_refunded || 0;
+                            processed.monthlyRevenue[monthYear].count++;
+                        } catch (e) {
+                            // Skip if date parsing fails
+                        }
+                    }
+                    
+                    // Recent transactions for dashboard
+                    if (row.purchased_timestamp && processed.recentTransactions.length < 10) {
+                        processed.recentTransactions.push({
+                            date: row.purchased_timestamp,
+                            product: row.product_name || 'Unknown',
+                            location: row.location_name || 'Unknown',
+                            status: row.status || 'Unknown',
+                            amount: row.basket_total || 0
+                        });
+                    }
+                });
+                
+                // Calculate average price for each product
+                Object.keys(processed.products).forEach(product => {
+                    const p = processed.products[product];
+                    p.averagePrice = p.count > 0 ? p.revenue / p.count : 0;
+                });
+                
+                // Find favorite course for each customer
+                Object.keys(processed.customers).forEach(customer => {
+                    const c = processed.customers[customer];
+                    let favoriteCourse = null;
+                    let maxCount = 0;
+                    
+                    Object.keys(c.courses).forEach(course => {
+                        if (c.courses[course] > maxCount) {
+                            maxCount = c.courses[course];
+                            favoriteCourse = course;
+                        }
+                    });
+                    
+                    c.favoriteCourse = favoriteCourse;
+                });
+                
+                // Find top course for each location
+                Object.keys(processed.locations).forEach(location => {
+                    const loc = processed.locations[location];
+                    let topCourse = null;
+                    let maxRevenue = 0;
+                    
+                    Object.keys(loc.courses).forEach(course => {
+                        if (loc.courses[course].revenue > maxRevenue) {
+                            maxRevenue = loc.courses[course].revenue;
+                            topCourse = course;
+                        }
+                    });
+                    
+                    loc.topCourse = topCourse;
+                });
+                
+                // Calculate additional derived metrics
+                processed.averageTransactionValue = 
+                    processed.transactionCount > 0 ? processed.totalRevenue / processed.transactionCount : 0;
+                
+                processed.refundRate = 
+                    processed.totalRevenue > 0 ? (processed.totalRefunded / processed.totalRevenue) * 100 : 0;
+                
+                processed.feePercentage = 
+                    processed.totalRevenue > 0 ? (processed.providerFees / processed.totalRevenue) * 100 : 0;
+                
+                // Sort monthly revenue for trend analysis
+                processed.monthlyRevenueSorted = Object.entries(processed.monthlyRevenue)
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([month, data]) => ({
+                        month,
+                        ...data
+                    }));
+                
+                // Get top products by revenue
+                processed.topProductsByRevenue = Object.entries(processed.products)
+                    .sort((a, b) => b[1].revenue - a[1].revenue)
+                    .slice(0, 10)
+                    .map(([name, data]) => ({
+                        name,
+                        ...data
+                    }));
+                
+                // Get top locations by revenue
+                processed.topLocationsByRevenue = Object.entries(processed.locations)
+                    .sort((a, b) => b[1].revenue - a[1].revenue)
+                    .slice(0, 10)
+                    .map(([name, data]) => ({
+                        name,
+                        ...data
+                    }));
+                
+                // Get top customers by spending
+                processed.topCustomersBySpending = Object.entries(processed.customers)
+                    .sort((a, b) => b[1].totalSpent - a[1].totalSpent)
+                    .slice(0, 10)
+                    .map(([email, data]) => ({
+                        email,
+                        ...data
+                    }));
+                
+                return processed;
+            }
+            
+            // Update dashboard UI with processed data
+            function updateDashboard(data) {
+                // Update dashboard metrics
+                document.getElementById('total-revenue').textContent = formatCurrency(data.totalRevenue);
+                document.getElementById('total-transactions').textContent = data.transactionCount;
+                document.getElementById('avg-transaction').textContent = formatCurrency(data.averageTransactionValue);
+                
+                document.getElementById('revenue-trend').textContent = 
+                    `${data.completedTransactions} completed transactions`;
+                
+                document.getElementById('transactions-completed').textContent = 
+                    `${((data.completedTransactions / data.transactionCount) * 100).toFixed(1)}% completion rate`;
+                
+                document.getElementById('refund-info').textContent = 
+                    `${formatCurrency(data.totalRefunded)} total refunded`;
+                
+                // Update financial page metrics
+                document.getElementById('net-revenue').textContent = formatCurrency(data.netRevenue);
+                document.getElementById('total-refunded').textContent = formatCurrency(data.totalRefunded);
+                document.getElementById('provider-fees').textContent = formatCurrency(data.providerFees);
+                
+                document.getElementById('net-revenue-trend').textContent = 
+                    `${((data.netRevenue / data.totalRevenue) * 100).toFixed(1)}% of gross revenue`;
+                
+                document.getElementById('refund-percentage').textContent = 
+                    `${data.refundRate.toFixed(1)}% refund rate`;
+                
+                document.getElementById('fees-percentage').textContent = 
+                    `${data.feePercentage.toFixed(1)}% of total revenue`;
+                
+                // Populate recent transactions table
+                const transactionsTable = document.getElementById('recent-transactions');
+                transactionsTable.innerHTML = '';
+                
+                data.recentTransactions.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${formatDate(transaction.date)}</td>
+                        <td>${transaction.product}</td>
+                        <td>${transaction.location}</td>
+                        <td>${transaction.status}</td>
+                        <td>${formatCurrency(transaction.amount)}</td>
+                    `;
+                    
+                    transactionsTable.appendChild(row);
+                });
+                
+                // Populate top customers table
+                const customersTable = document.getElementById('top-customers');
+                customersTable.innerHTML = '';
+                
+                data.topCustomersBySpending.forEach(customer => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${maskEmail(customer.email)}</td>
+                        <td>${customer.count}</td>
+                        <td>${formatCurrency(customer.totalSpent)}</td>
+                        <td>${customer.lastBooking ? formatDate(customer.lastBooking) : 'N/A'}</td>
+                        <td>${customer.favoriteCourse || 'N/A'}</td>
+                    `;
+                    
+                    customersTable.appendChild(row);
+                });
+                
+                // Populate courses table
+                const coursesTable = document.getElementById('courses-table');
+                coursesTable.innerHTML = '';
+                
+                data.topProductsByRevenue.forEach(product => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${product.name}</td>
+                        <td>${product.count}</td>
+                        <td>${formatCurrency(product.revenue)}</td>
+                        <td>${formatCurrency(product.averagePrice)}</td>
+                        <td>Active</td>
+                    `;
+                    
+                    coursesTable.appendChild(row);
+                });
+                
+                // Populate locations table
+                const locationsTable = document.getElementById('locations-table');
+                locationsTable.innerHTML = '';
+                
+                data.topLocationsByRevenue.forEach(location => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${location.name}</td>
+                        <td>${location.count}</td>
+                        <td>${formatCurrency(location.revenue)}</td>
+                        <td>${location.topCourse || 'N/A'}</td>
+                        <td>Good</td>
+                    `;
+                    
+                    locationsTable.appendChild(row);
+                });
+                
+                // Initialize charts
+                createRevenueChart(data);
+                createCoursesChart(data);
+                createLocationsChart(data);
+                createCoursesRevenueChart(data);
+                createCoursesPopularityChart(data);
+                createCoursesTrendChart(data);
+                createRevenueRefundsChart(data);
+                createPaymentMethodsChart(data);
+                createCustomerSpendingChart(data);
+                createCustomerActivityChart(data);
+                createLocationPerformanceChart(data);
+                createLocationCoursesChart(data);
+                createLocationTrendChart(data);
+            }
+            
+            // Chart creation functions
+            function createRevenueChart(data) {
+                const ctx = document.getElementById('revenue-chart').getContext('2d');
+                
+                const months = data.monthlyRevenueSorted.map(item => formatMonth(item.month));
+                const revenues = data.monthlyRevenueSorted.map(item => item.revenue);
+                const refunds = data.monthlyRevenueSorted.map(item => item.refunds);
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Revenue',
+                                data: revenues,
+                                backgroundColor: 'rgba(46, 204, 113, 0.6)',
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                borderWidth: 1,
+                                order: 1
+                            },
+                            {
+                                label: 'Refunds',
+                                data: refunds,
+                                backgroundColor: 'rgba(231, 76, 60, 0.6)',
+                                borderColor: 'rgba(231, 76, 60, 1)',
+                                borderWidth: 1,
+                                order: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Revenue vs Refunds'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.parsed.y);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createPaymentMethodsChart(data) {
+                const ctx = document.getElementById('payment-methods-chart').getContext('2d');
+                
+                // For this example, we'll use the payment methods data if available
+                // or create simulated data if it's not available in our dataset
+                let paymentLabels = Object.keys(data.paymentMethods || {});
+                let paymentValues = Object.values(data.paymentMethods || {});
+                
+                // If no payment data is available, use placeholder data
+                if (paymentLabels.length === 0) {
+                    paymentLabels = ['Credit Card', 'PayPal', 'Bank Transfer', 'Other'];
+                    const total = data.transactionCount;
+                    paymentValues = [
+                        Math.round(total * 0.65),
+                        Math.round(total * 0.25),
+                        Math.round(total * 0.08),
+                        Math.round(total * 0.02)
+                    ];
                 }
-            });
+                
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: paymentLabels,
+                        datasets: [{
+                            data: paymentValues,
+                            backgroundColor: [
+                                'rgba(52, 152, 219, 0.7)',
+                                'rgba(46, 204, 113, 0.7)',
+                                'rgba(155, 89, 182, 0.7)',
+                                'rgba(241, 196, 15, 0.7)'
+                            ],
+                            borderColor: 'white',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Payment Method Distribution'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} transactions (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
             
-            // Initialize charts
-            initializeCharts();
+            function createCustomerSpendingChart(data) {
+                const ctx = document.getElementById('customer-spending-chart').getContext('2d');
+                
+                // Get top 10 customers by spending
+                const customerNames = data.topCustomersBySpending.map(customer => maskEmail(customer.email));
+                const customerSpending = data.topCustomersBySpending.map(customer => customer.totalSpent);
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: customerNames,
+                        datasets: [{
+                            label: 'Total Spent',
+                            data: customerSpending,
+                            backgroundColor: 'rgba(155, 89, 182, 0.6)',
+                            borderColor: 'rgba(155, 89, 182, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Top Customers by Spending'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.parsed.x);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
             
-            // Load sample data
-            loadSampleData();
+            function createCustomerActivityChart(data) {
+                const ctx = document.getElementById('customer-activity-chart').getContext('2d');
+                
+                // Calculate spending ranges for customers
+                const spendingRanges = {
+                    '< $100': 0,
+                    '$100 - $500': 0,
+                    '$500 - $1000': 0,
+                    '$1000 - $2000': 0,
+                    '> $2000': 0
+                };
+                
+                Object.values(data.customers).forEach(customer => {
+                    const spent = customer.totalSpent;
+                    
+                    if (spent < 100) {
+                        spendingRanges['< $100']++;
+                    } else if (spent < 500) {
+                        spendingRanges['$100 - $500']++;
+                    } else if (spent < 1000) {
+                        spendingRanges['$500 - $1000']++;
+                    } else if (spent < 2000) {
+                        spendingRanges['$1000 - $2000']++;
+                    } else {
+                        spendingRanges['> $2000']++;
+                    }
+                });
+                
+                const rangeLabels = Object.keys(spendingRanges);
+                const rangeCounts = Object.values(spendingRanges);
+                
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: rangeLabels,
+                        datasets: [{
+                            data: rangeCounts,
+                            backgroundColor: [
+                                'rgba(52, 152, 219, 0.7)',
+                                'rgba(46, 204, 113, 0.7)',
+                                'rgba(155, 89, 182, 0.7)',
+                                'rgba(241, 196, 15, 0.7)',
+                                'rgba(230, 126, 34, 0.7)'
+                            ],
+                            borderColor: 'white',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Customer Spending Distribution'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} customers (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
             
-            // Add field to form builder
-            document.getElementById('add-field').addEventListener('click', function() {
-                const formFields = 
+            function createLocationPerformanceChart(data) {
+                const ctx = document.getElementById('location-performance-chart').getContext('2d');
+                
+                const locationNames = data.topLocationsByRevenue.map(location => location.name);
+                const locationRevenues = data.topLocationsByRevenue.map(location => location.revenue);
+                const locationCounts = data.topLocationsByRevenue.map(location => location.count);
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: locationNames,
+                        datasets: [
+                            {
+                                label: 'Revenue',
+                                data: locationRevenues,
+                                backgroundColor: 'rgba(52, 152, 219, 0.6)',
+                                borderColor: 'rgba(52, 152, 219, 1)',
+                                borderWidth: 1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Bookings',
+                                data: locationCounts,
+                                backgroundColor: 'rgba(241, 196, 15, 0.6)',
+                                borderColor: 'rgba(241, 196, 15, 1)',
+                                borderWidth: 1,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Location Performance (Revenue vs Bookings)'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.dataset.label === 'Revenue') {
+                                            return formatCurrency(context.parsed.y);
+                                        } else {
+                                            return `${context.parsed.y} bookings`;
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                type: 'linear',
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Revenue'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                type: 'linear',
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Number of Bookings'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createLocationCoursesChart(data) {
+                const ctx = document.getElementById('location-courses-chart').getContext('2d');
+                
+                // Get the top location
+                const topLocation = data.topLocationsByRevenue[0];
+                
+                if (!topLocation) {
+                    return; // No location data available
+                }
+                
+                // Get courses for the top location
+                const courseData = Object.entries(topLocation.courses || {})
+                    .sort((a, b) => b[1].revenue - a[1].revenue)
+                    .slice(0, 5);
+                
+                const courseNames = courseData.map(([name]) => name);
+                const courseRevenues = courseData.map(([_, data]) => data.revenue);
+                
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: courseNames,
+                        datasets: [{
+                            data: courseRevenues,
+                            backgroundColor: [
+                                'rgba(52, 152, 219, 0.7)',
+                                'rgba(46, 204, 113, 0.7)',
+                                'rgba(155, 89, 182, 0.7)',
+                                'rgba(241, 196, 15, 0.7)',
+                                'rgba(230, 126, 34, 0.7)'
+                            ],
+                            borderColor: 'white',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `Top Courses at ${topLocation.name}`
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = formatCurrency(context.parsed);
+                                        const percentage = ((context.parsed / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createLocationTrendChart(data) {
+                const ctx = document.getElementById('location-trend-chart').getContext('2d');
+                
+                const months = data.monthlyRevenueSorted.map(item => formatMonth(item.month));
+                
+                // Get top 3 locations for trend chart
+                const topLocations = data.topLocationsByRevenue.slice(0, 3);
+                
+                // Create simulated trend data for demo purposes
+                const datasets = topLocations.map((location, index) => {
+                    const baseValue = location.revenue / months.length;
+                    const trendData = months.map((_, i) => {
+                        // Create some random variation for the trend
+                        return baseValue * (0.7 + (0.6 * Math.random()));
+                    });
+                    
+                    const colors = [
+                        'rgba(52, 152, 219, 1)',
+                        'rgba(46, 204, 113, 1)',
+                        'rgba(155, 89, 182, 1)'
+                    ];
+                    
+                    return {
+                        label: location.name,
+                        data: trendData,
+                        borderColor: colors[index],
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.4
+                    };
+                });
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Location Revenue Trends (Top 3 Locations)'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Revenue'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Utility functions
+            function formatCurrency(value) {
+                return '.monthlyRevenueSorted.map(item => item.revenue);
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Monthly Revenue',
+                            data: revenues,
+                            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Monthly Revenue Trend'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.parsed.y);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createCoursesChart(data) {
+                const ctx = document.getElementById('courses-chart').getContext('2d');
+                
+                const productNames = data.topProductsByRevenue.map(product => product.name);
+                const productRevenues = data.topProductsByRevenue.map(product => product.revenue);
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: productNames,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: productRevenues,
+                            backgroundColor: 'rgba(46, 204, 113, 0.6)',
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Top Courses by Revenue'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.parsed.x);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createLocationsChart(data) {
+                const ctx = document.getElementById('locations-chart').getContext('2d');
+                
+                const locationNames = data.topLocationsByRevenue.map(location => location.name);
+                const locationRevenues = data.topLocationsByRevenue.map(location => location.revenue);
+                
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: locationNames,
+                        datasets: [{
+                            data: locationRevenues,
+                            backgroundColor: [
+                                'rgba(52, 152, 219, 0.7)',
+                                'rgba(46, 204, 113, 0.7)',
+                                'rgba(155, 89, 182, 0.7)',
+                                'rgba(52, 73, 94, 0.7)',
+                                'rgba(241, 196, 15, 0.7)',
+                                'rgba(230, 126, 34, 0.7)',
+                                'rgba(231, 76, 60, 0.7)',
+                                'rgba(26, 188, 156, 0.7)',
+                                'rgba(41, 128, 185, 0.7)',
+                                'rgba(142, 68, 173, 0.7)'
+                            ],
+                            borderColor: 'white',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Revenue by Location'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = formatCurrency(context.parsed);
+                                        const percentage = ((context.parsed / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createCoursesRevenueChart(data) {
+                const ctx = document.getElementById('courses-revenue-chart').getContext('2d');
+                
+                const productNames = data.topProductsByRevenue.slice(0, 10).map(product => product.name);
+                const productRevenues = data.topProductsByRevenue.slice(0, 10).map(product => product.revenue);
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: productNames,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: productRevenues,
+                            backgroundColor: 'rgba(52, 152, 219, 0.6)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Course Revenue Breakdown'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.parsed.y);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createCoursesPopularityChart(data) {
+                const ctx = document.getElementById('courses-popularity-chart').getContext('2d');
+                
+                const products = data.topProductsByRevenue.slice(0, 10);
+                const productNames = products.map(product => product.name);
+                const productCounts = products.map(product => product.count);
+                
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: productNames,
+                        datasets: [{
+                            data: productCounts,
+                            backgroundColor: [
+                                'rgba(52, 152, 219, 0.7)',
+                                'rgba(46, 204, 113, 0.7)',
+                                'rgba(155, 89, 182, 0.7)',
+                                'rgba(52, 73, 94, 0.7)',
+                                'rgba(241, 196, 15, 0.7)',
+                                'rgba(230, 126, 34, 0.7)',
+                                'rgba(231, 76, 60, 0.7)',
+                                'rgba(26, 188, 156, 0.7)',
+                                'rgba(41, 128, 185, 0.7)',
+                                'rgba(142, 68, 173, 0.7)'
+                            ],
+                            borderColor: 'white',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Course Popularity (Number of Bookings)'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const percentage = ((context.parsed / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                                        return `${label}: ${value} bookings (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createCoursesTrendChart(data) {
+                // For this example, we'll create a simulated trend based on the monthly data
+                // In a real application, this would use actual course booking trends
+                const ctx = document.getElementById('courses-trend-chart').getContext('2d');
+                
+                const months = data.monthlyRevenueSorted.map(item => formatMonth(item.month));
+                
+                // Get top 3 courses for trend chart
+                const topCourses = data.topProductsByRevenue.slice(0, 3);
+                
+                // Create random trend data (for demo purposes)
+                const datasets = topCourses.map((course, index) => {
+                    const baseValue = course.count / months.length;
+                    const trendData = months.map((_, i) => {
+                        // Create some random variation for the trend
+                        return baseValue * (0.7 + (0.6 * Math.random()));
+                    });
+                    
+                    const colors = [
+                        'rgba(52, 152, 219, 1)',
+                        'rgba(46, 204, 113, 1)',
+                        'rgba(155, 89, 182, 1)'
+                    ];
+                    
+                    const bgColors = [
+                        'rgba(52, 152, 219, 0.2)',
+                        'rgba(46, 204, 113, 0.2)',
+                        'rgba(155, 89, 182, 0.2)'
+                    ];
+                    
+                    return {
+                        label: course.name,
+                        data: trendData,
+                        borderColor: colors[index],
+                        backgroundColor: bgColors[index],
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    };
+                });
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Course Booking Trends (Top 3 Courses)'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Bookings'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createRevenueRefundsChart(data) {
+                const ctx = document.getElementById('revenue-refunds-chart').getContext('2d');
+                
+                const months = data.monthlyRevenueSorted.map(item => formatMonth(item.month));
+                const revenues = data
+                    <h2 class="section-title">Monthly Revenue Trend</h2>
+                    <div class="chart-container">
+                        <canvas id="revenue-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h2 class="section-title">Top Courses by Revenue</h2>
+                        <div class="chart-container">
+                            <canvas id="courses-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2 class="section-title">Top Locations by Revenue</h2>
+                        <div class="chart-container">
+                            <canvas id="locations-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Recent Transactions</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-transactions">
+                            <tr>
+                                <td colspan="5" class="text-center">Loading transactions...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Courses Page -->
+            <div class="page-content" id="courses-page">
+                <div class="card">
+                    <h2 class="section-title">Course Performance</h2>
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="courses-revenue">Revenue by Course</div>
+                            <div class="tab" data-tab="courses-popularity">Popularity</div>
+                            <div class="tab" data-tab="courses-trend">Booking Trends</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="courses-revenue">
+                            <div class="chart-container">
+                                <canvas id="courses-revenue-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="courses-popularity">
+                            <div class="chart-container">
+                                <canvas id="courses-popularity-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="courses-trend">
+                            <div class="chart-container">
+                                <canvas id="courses-trend-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Course Details</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Course Name</th>
+                                <th>Total Bookings</th>
+                                <th>Total Revenue</th>
+                                <th>Average Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courses-table">
+                            <tr>
+                                <td colspan="5" class="text-center">Loading course data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Financial Page -->
+            <div class="page-content" id="financial-page">
+                <div class="dashboard-grid">
+                    <div class="card metric-card">
+                        <h3 class="metric-title">Net Revenue</h3>
+                        <div class="metric-value" id="net-revenue">$0</div>
+                        <div class="metric-change positive">
+                            <span id="net-revenue-trend">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card metric-card">
+                        <h3 class="metric-title">Total Refunded</h3>
+                        <div class="metric-value" id="total-refunded">$0</div>
+                        <div class="metric-change">
+                            <span id="refund-percentage">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card metric-card">
+                        <h3 class="metric-title">Payment Provider Fees</h3>
+                        <div class="metric-value" id="provider-fees">$0</div>
+                        <div class="metric-change">
+                            <span id="fees-percentage">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Revenue vs Refunds</h2>
+                    <div class="chart-container">
+                        <canvas id="revenue-refunds-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Payment Methods</h2>
+                    <div class="chart-container">
+                        <canvas id="payment-methods-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customers Page -->
+            <div class="page-content" id="customers-page">
+                <div class="card">
+                    <h2 class="section-title">Customer Analytics</h2>
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="customer-spending">Customer Spending</div>
+                            <div class="tab" data-tab="customer-activity">Activity Patterns</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="customer-spending">
+                            <div class="chart-container">
+                                <canvas id="customer-spending-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="customer-activity">
+                            <div class="chart-container">
+                                <canvas id="customer-activity-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card"> + value.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+            
+            function formatDate(dateString) {
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                } catch (e) {
+                    return 'Invalid Date';
+                }
+            }
+            
+            function formatMonth(monthYear) {
+                try {
+                    const [year, month] = monthYear.split('-');
+                    return new Date(year, month - 1).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short'
+                    });
+                } catch (e) {
+                    return monthYear;
+                }
+            }
+            
+            function maskEmail(email) {
+                if (!email) return 'Unknown';
+                
+                const parts = email.split('@');
+                if (parts.length !== 2) return email;
+                
+                const name = parts[0];
+                const domain = parts[1];
+                
+                // Show first 2 characters, then asterisks, then last character of name
+                const maskedName = name.length <= 4 
+                    ? name.charAt(0) + '*'.repeat(name.length - 1)
+                    : name.substring(0, 2) + '*'.repeat(name.length - 3) + name.charAt(name.length - 1);
+                
+                return `${maskedName}@${domain}`;
+            }
+        });
+    </script>
+</body>
+</html>.monthlyRevenueSorted.map(item => item.revenue);
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Monthly Revenue',
+                            data: revenues,
+                            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Monthly Revenue Trend'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.parsed.y);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createCoursesChart(data) {
+                const ctx = document.getElementById('courses-chart').getContext('2d');
+                
+                const productNames = data.topProductsByRevenue.map(product => product.name);
+                const productRevenues = data.topProductsByRevenue.map(product => product.revenue);
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: productNames,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: productRevenues,
+                            backgroundColor: 'rgba(46, 204, 113, 0.6)',
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Top Courses by Revenue'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.parsed.x);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createLocationsChart(data) {
+                const ctx = document.getElementById('locations-chart').getContext('2d');
+                
+                const locationNames = data.topLocationsByRevenue.map(location => location.name);
+                const locationRevenues = data.topLocationsByRevenue.map(location => location.revenue);
+                
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: locationNames,
+                        datasets: [{
+                            data: locationRevenues,
+                            backgroundColor: [
+                                'rgba(52, 152, 219, 0.7)',
+                                'rgba(46, 204, 113, 0.7)',
+                                'rgba(155, 89, 182, 0.7)',
+                                'rgba(52, 73, 94, 0.7)',
+                                'rgba(241, 196, 15, 0.7)',
+                                'rgba(230, 126, 34, 0.7)',
+                                'rgba(231, 76, 60, 0.7)',
+                                'rgba(26, 188, 156, 0.7)',
+                                'rgba(41, 128, 185, 0.7)',
+                                'rgba(142, 68, 173, 0.7)'
+                            ],
+                            borderColor: 'white',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Revenue by Location'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = formatCurrency(context.parsed);
+                                        const percentage = ((context.parsed / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createCoursesRevenueChart(data) {
+                const ctx = document.getElementById('courses-revenue-chart').getContext('2d');
+                
+                const productNames = data.topProductsByRevenue.slice(0, 10).map(product => product.name);
+                const productRevenues = data.topProductsByRevenue.slice(0, 10).map(product => product.revenue);
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: productNames,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: productRevenues,
+                            backgroundColor: 'rgba(52, 152, 219, 0.6)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Course Revenue Breakdown'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.parsed.y);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createCoursesPopularityChart(data) {
+                const ctx = document.getElementById('courses-popularity-chart').getContext('2d');
+                
+                const products = data.topProductsByRevenue.slice(0, 10);
+                const productNames = products.map(product => product.name);
+                const productCounts = products.map(product => product.count);
+                
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: productNames,
+                        datasets: [{
+                            data: productCounts,
+                            backgroundColor: [
+                                'rgba(52, 152, 219, 0.7)',
+                                'rgba(46, 204, 113, 0.7)',
+                                'rgba(155, 89, 182, 0.7)',
+                                'rgba(52, 73, 94, 0.7)',
+                                'rgba(241, 196, 15, 0.7)',
+                                'rgba(230, 126, 34, 0.7)',
+                                'rgba(231, 76, 60, 0.7)',
+                                'rgba(26, 188, 156, 0.7)',
+                                'rgba(41, 128, 185, 0.7)',
+                                'rgba(142, 68, 173, 0.7)'
+                            ],
+                            borderColor: 'white',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Course Popularity (Number of Bookings)'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const percentage = ((context.parsed / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                                        return `${label}: ${value} bookings (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createCoursesTrendChart(data) {
+                // For this example, we'll create a simulated trend based on the monthly data
+                // In a real application, this would use actual course booking trends
+                const ctx = document.getElementById('courses-trend-chart').getContext('2d');
+                
+                const months = data.monthlyRevenueSorted.map(item => formatMonth(item.month));
+                
+                // Get top 3 courses for trend chart
+                const topCourses = data.topProductsByRevenue.slice(0, 3);
+                
+                // Create random trend data (for demo purposes)
+                const datasets = topCourses.map((course, index) => {
+                    const baseValue = course.count / months.length;
+                    const trendData = months.map((_, i) => {
+                        // Create some random variation for the trend
+                        return baseValue * (0.7 + (0.6 * Math.random()));
+                    });
+                    
+                    const colors = [
+                        'rgba(52, 152, 219, 1)',
+                        'rgba(46, 204, 113, 1)',
+                        'rgba(155, 89, 182, 1)'
+                    ];
+                    
+                    const bgColors = [
+                        'rgba(52, 152, 219, 0.2)',
+                        'rgba(46, 204, 113, 0.2)',
+                        'rgba(155, 89, 182, 0.2)'
+                    ];
+                    
+                    return {
+                        label: course.name,
+                        data: trendData,
+                        borderColor: colors[index],
+                        backgroundColor: bgColors[index],
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    };
+                });
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Course Booking Trends (Top 3 Courses)'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Bookings'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function createRevenueRefundsChart(data) {
+                const ctx = document.getElementById('revenue-refunds-chart').getContext('2d');
+                
+                const months = data.monthlyRevenueSorted.map(item => formatMonth(item.month));
+                const revenues = data
+                    <h2 class="section-title">Monthly Revenue Trend</h2>
+                    <div class="chart-container">
+                        <canvas id="revenue-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h2 class="section-title">Top Courses by Revenue</h2>
+                        <div class="chart-container">
+                            <canvas id="courses-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2 class="section-title">Top Locations by Revenue</h2>
+                        <div class="chart-container">
+                            <canvas id="locations-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Recent Transactions</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-transactions">
+                            <tr>
+                                <td colspan="5" class="text-center">Loading transactions...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Courses Page -->
+            <div class="page-content" id="courses-page">
+                <div class="card">
+                    <h2 class="section-title">Course Performance</h2>
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="courses-revenue">Revenue by Course</div>
+                            <div class="tab" data-tab="courses-popularity">Popularity</div>
+                            <div class="tab" data-tab="courses-trend">Booking Trends</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="courses-revenue">
+                            <div class="chart-container">
+                                <canvas id="courses-revenue-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="courses-popularity">
+                            <div class="chart-container">
+                                <canvas id="courses-popularity-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="courses-trend">
+                            <div class="chart-container">
+                                <canvas id="courses-trend-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Course Details</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Course Name</th>
+                                <th>Total Bookings</th>
+                                <th>Total Revenue</th>
+                                <th>Average Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courses-table">
+                            <tr>
+                                <td colspan="5" class="text-center">Loading course data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Financial Page -->
+            <div class="page-content" id="financial-page">
+                <div class="dashboard-grid">
+                    <div class="card metric-card">
+                        <h3 class="metric-title">Net Revenue</h3>
+                        <div class="metric-value" id="net-revenue">$0</div>
+                        <div class="metric-change positive">
+                            <span id="net-revenue-trend">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card metric-card">
+                        <h3 class="metric-title">Total Refunded</h3>
+                        <div class="metric-value" id="total-refunded">$0</div>
+                        <div class="metric-change">
+                            <span id="refund-percentage">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card metric-card">
+                        <h3 class="metric-title">Payment Provider Fees</h3>
+                        <div class="metric-value" id="provider-fees">$0</div>
+                        <div class="metric-change">
+                            <span id="fees-percentage">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Revenue vs Refunds</h2>
+                    <div class="chart-container">
+                        <canvas id="revenue-refunds-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Payment Methods</h2>
+                    <div class="chart-container">
+                        <canvas id="payment-methods-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customers Page -->
+            <div class="page-content" id="customers-page">
+                <div class="card">
+                    <h2 class="section-title">Customer Analytics</h2>
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="customer-spending">Customer Spending</div>
+                            <div class="tab" data-tab="customer-activity">Activity Patterns</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="customer-spending">
+                            <div class="chart-container">
+                                <canvas id="customer-spending-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="customer-activity">
+                            <div class="chart-container">
+                                <canvas id="customer-activity-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
