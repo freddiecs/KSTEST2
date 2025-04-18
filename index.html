@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Analytics Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --danger: #e63946;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: #333;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background-color: #2b2d42;
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            width: 250px;
+            overflow-y: auto;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-icon {
+            background-color: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .menu {
+            list-style: none;
+        }
+        
+        .menu li {
+            margin-bottom: 5px;
+        }
+        
+        .menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #d8dbe2;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .menu a:hover, .menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .menu-icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .content {
+            grid-column: 2;
+            padding: 20px 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .data-import {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .upload-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .upload-box {
+            flex: 1;
+            min-width: 250px;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-box:hover {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 30px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .upload-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .upload-description {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .upload-button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-button:hover {
+            background-color: var(--secondary);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+        
+        .metric-card {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metric-title {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .metric-change {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .positive {
+            color: #10b981;
+        }
+        
+        .negative {
+            color: #ef4444;
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-top: 15px;
+        }
+        
+        .form-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: #f1f5f9;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                z-index: 1000;
+                transition: all 0.3s;
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            .content {
+                grid-column: 1;
+                padding: 15px;
+            }
+            
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 1001;
+                background-color: var(--primary);
+                color: white;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">B</div>
+                <span>BusinessPro</span>
+            </div>
+            <ul class="menu">
+                <li><a href="#" class="active" data-page="dashboard"><span class="menu-icon">📊</span> Dashboard</a></li>
+                <li><a href="#" data-page="bookings"><span class="menu-icon">📅</span> Bookings</a></li>
+                <li><a href="#" data-page="accounting"><span class="menu-icon">💰</span> Accounting</a></li>
+                <li><a href="#" data-page="reports"><span class="menu-icon">📈</span> Reports</a></li>
+                <li><a href="#" data-page="forms"><span class="menu-icon">📝</span> Forms</a></li>
+                <li><a href="#" data-page="settings"><span class="menu-icon">⚙️</span> Settings</a></li>
+            </ul>
+        </aside>
+        
+        <main class="content">
+            <div class="header">
+                <h1 class="page-title">Dashboard</h1>
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <span>Admin</span>
+                </div>
+            </div>
+            
+            <!-- Dashboard Page -->
+            <div class="page-content active" id="dashboard-page">
+                <div class="data-import">
+                    <h2 class="section-title">Import Data</h2>
+                    <div class="upload-container">
+                        <div class="upload-box" id="booking-upload">
+                            <div class="upload-icon">📅</div>
+                            <h3 class="upload-title">Booking Data</h3>
+                            <p class="upload-description">Upload CSV or Excel files from your booking system</p>
+                            <input type="file" id="booking-file" class="hidden" accept=".csv, .xlsx, .xls">
+                            <button class="upload-button" id="booking-btn">Choose File</button>
+                        </div>
+                        
+                        <div class="upload-box" id="accounting-upload">
+                            <div class="upload-icon">💰</div>
+                            <h3 class="upload-title">Accounting Data</h3>
+                            <p class="upload-description">Upload CSV or Excel files from your accounting system</p>
+                            <input type="file" id="accounting-file" class="hidden" accept=".csv, .xlsx, .xls">
+                            <button class="upload-button" id="accounting-btn">Choose File</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card metric-card">
+                        <h3 class="metric-title">Total Revenue</h3>
+                        <div class="metric-value">$0</div>
+                        <div class="metric-change positive">
+                            <span>+0% vs last period</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card metric-card">
+                        <h3 class="metric-title">Total Bookings</h3>
+                        <div class="metric-value">0</div>
+                        <div class="metric-change positive">
+                            <span>+0% vs last period</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card metric-card">
+                        <h3 class="metric-title">Average Booking Value</h3>
+                        <div class="metric-value">$0</div>
+                        <div class="metric-change negative">
+                            <span>+0% vs last period</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Revenue Overview</h2>
+                    <div class="chart-container">
+                        <canvas id="revenue-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h2 class="section-title">Bookings by Type</h2>
+                        <div class="chart-container">
+                            <canvas id="bookings-pie-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2 class="section-title">Recent Transactions</h2>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-table">
+                                <tr>
+                                    <td colspan="3" class="text-center">No data available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bookings Page -->
+            <div class="page-content" id="bookings-page">
+                <div class="card">
+                    <h2 class="section-title">Booking Management</h2>
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="booking-list">Booking List</div>
+                            <div class="tab" data-tab="booking-analytics">Analytics</div>
+                            <div class="tab" data-tab="booking-add">Add New Booking</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="booking-list">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Date</th>
+                                        <th>Customer</th>
+                                        <th>Service</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookings-table">
+                                    <tr>
+                                        <td colspan="6" class="text-center">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-content" id="booking-analytics">
+                            <div class="chart-container">
+                                <canvas id="bookings-trend-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="booking-add">
+                            <div class="form-section">
+                                <div class="form-group">
+                                    <label class="form-label">Customer Name</label>
+                                    <input type="text" class="form-control" id="booking-customer">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Service Type</label>
+                                    <select class="form-control" id="booking-service">
+                                        <option value="">Select a service</option>
+                                        <option value="Consultation">Consultation</option>
+                                        <option value="Standard Service">Standard Service</option>
+                                        <option value="Premium Service">Premium Service</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="booking-date">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Amount</label>
+                                    <input type="number" class="form-control" id="booking-amount">
+                                </div>
+                                <button class="btn btn-primary" id="save-booking">Save Booking</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Accounting Page -->
+            <div class="page-content" id="accounting-page">
+                <div class="card">
+                    <h2 class="section-title">Financial Overview</h2>
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="transactions">Transactions</div>
+                            <div class="tab" data-tab="revenue-analysis">Revenue Analysis</div>
+                            <div class="tab" data-tab="expense-analysis">Expense Analysis</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="transactions">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Category</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accounting-table">
+                                    <tr>
+                                        <td colspan="5" class="text-center">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-content" id="revenue-analysis">
+                            <div class="chart-container">
+                                <canvas id="revenue-analysis-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="expense-analysis">
+                            <div class="chart-container">
+                                <canvas id="expense-analysis-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reports Page -->
+            <div class="page-content" id="reports-page">
+                <div class="card">
+                    <h2 class="section-title">Business Reports</h2>
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="profit-loss">Profit & Loss</div>
+                            <div class="tab" data-tab="trend-analysis">Trend Analysis</div>
+                            <div class="tab" data-tab="customer-analytics">Customer Analytics</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="profit-loss">
+                            <div class="chart-container">
+                                <canvas id="profit-loss-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="trend-analysis">
+                            <div class="chart-container">
+                                <canvas id="trend-analysis-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="customer-analytics">
+                            <div class="chart-container">
+                                <canvas id="customer-analytics-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Forms Page -->
+            <div class="page-content" id="forms-page">
+                <div class="card">
+                    <h2 class="section-title">Custom Forms</h2>
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="form-list">Form List</div>
+                            <div class="tab" data-tab="form-builder">Form Builder</div>
+                            <div class="tab" data-tab="form-responses">Form Responses</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="form-list">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Form Name</th>
+                                        <th>Created Date</th>
+                                        <th>Responses</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Customer Feedback</td>
+                                        <td>Apr 18, 2025</td>
+                                        <td>0</td>
+                                        <td>Active</td>
+                                        <td>
+                                            <button class="btn btn-primary">View</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-content" id="form-builder">
+                            <div class="form-section">
+                                <div class="form-group">
+                                    <label class="form-label">Form Name</label>
+                                    <input type="text" class="form-control" placeholder="Enter form name">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Form Description</label>
+                                    <textarea class="form-control" rows="3" placeholder="Enter form description"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Form Fields</label>
+                                    <div id="form-fields">
+                                        <!-- Fields will be added here -->
+                                    </div>
+                                    <button class="btn btn-primary" id="add-field">Add Field</button>
+                                </div>
+                                <button class="btn btn-primary">Save Form</button>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="form-responses">
+                            <p>No form responses available yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Page -->
+            <div class="page-content" id="settings-page">
+                <div class="card">
+                    <h2 class="section-title">System Settings</h2>
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label class="form-label">Business Name</label>
+                            <input type="text" class="form-control" value="BusinessPro">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Business Email</label>
+                            <input type="email" class="form-control" value="admin@business.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Currency</label>
+                            <select class="form-control">
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="GBP">GBP (£)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Data Backup Frequency</label>
+                            <select class="form-control">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sample data for demonstration
+        const sampleBookingData = [
+            { id: 1, date: '2025-04-15', customer: 'John Doe', service: 'Consultation', amount: 150, status: 'Completed' },
+            { id: 2, date: '2025-04-16', customer: 'Jane Smith', service: 'Premium Service', amount: 350, status: 'Scheduled' },
+            { id: 3, date: '2025-04-17', customer: 'Robert Johnson', service: 'Standard Service', amount: 200, status: 'Completed' },
+            { id: 4, date: '2025-04-18', customer: 'Emily Davis', service: 'Consultation', amount: 150, status: 'Scheduled' }
+        ];
+        
+        const sampleAccountingData = [
+            { date: '2025-04-15', description: 'Consultation Service', category: 'Service Revenue', type: 'Income', amount: 150 },
+            { date: '2025-04-16', description: 'Premium Service', category: 'Service Revenue', type: 'Income', amount: 350 },
+            { date: '2025-04-16', description: 'Office Supplies', category: 'Office Expenses', type: 'Expense', amount: -75 },
+            { date: '2025-04-17', description: 'Standard Service', category: 'Service Revenue', type: 'Income', amount: 200 },
+            { date: '2025-04-17', description: 'Utility Bill', category: 'Utilities', type: 'Expense', amount: -120 }
+        ];
+        
+        // UI Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation
+            const menuLinks = document.querySelectorAll('.menu a');
+            const pageContents = document.querySelectorAll('.page-content');
+            
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update menu active state
+                    menuLinks.forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the corresponding page
+                    const targetPage = this.getAttribute('data-page');
+                    pageContents.forEach(page => page.classList.remove('active'));
+                    document.getElementById(`${targetPage}-page`).classList.add('active');
+                    
+                    // Update page title
+                    document.querySelector('.page-title').textContent = this.textContent.trim();
+                });
+            });
+            
+            // Tab navigation
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const parent = this.closest('.tabs');
+                    const container = this.closest('.tab-container');
+                    
+                    // Update tab active state
+                    parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the corresponding tab content
+                    const targetTab = this.getAttribute('data-tab');
+                    container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    container.querySelector(`#${targetTab}`).classList.add('active');
+                });
+            });
+            
+            // File upload handling
+            document.getElementById('booking-btn').addEventListener('click', function() {
+                document.getElementById('booking-file').click();
+            });
+            
+            document.getElementById('accounting-btn').addEventListener('click', function() {
+                document.getElementById('accounting-file').click();
+            });
+            
+            document.getElementById('booking-file').addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const fileName = e.target.files[0].name;
+                    processFile(e.target.files[0], 'booking');
+                    alert(`Booking file "${fileName}" uploaded successfully!`);
+                }
+            });
+            
+            document.getElementById('accounting-file').addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const fileName = e.target.files[0].name;
+                    processFile(e.target.files[0], 'accounting');
+                    alert(`Accounting file "${fileName}" uploaded successfully!`);
+                }
+            });
+            
+            // Initialize charts
+            initializeCharts();
+            
+            // Load sample data
+            loadSampleData();
+            
+            // Add field to form builder
+            document.getElementById('add-field').addEventListener('click', function() {
+                const formFields = 
